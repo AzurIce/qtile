@@ -31,10 +31,24 @@ from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.layout.xmonad import MonadTall
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
+from libqtile.extension import dmenu
+
+from libqtile import hook
+import os
+import subprocess
+
+@hook.subscribe.startup_once
+def start_once():
+    home = os.path.expanduser('~')
+    subprocess.call([home + '/.config/qtile/autostart.sh'])
+
 
 mod = "mod4"
 terminal = guess_terminal()
 
+color_archblue = "#1793d1"
+color_grey = "#1c1f24"
+color_light_grey = "#282c34"
 
 ##########
 ## Keys ##
@@ -65,7 +79,14 @@ keys = [
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    # Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key(["mod1"], "space", lazy.run_extension(dmenu.DmenuRun(
+        dmenu_promt=">",
+        background=color_grey,
+        foreground="#474747",
+        selected_background=color_archblue,
+        selected_foreground="#474747",
+    )), desc="dmenu"),
 ]
 
 groups = [Group(i) for i in "123456789"]
@@ -98,9 +119,9 @@ for i in groups:
 ## Layouts ##
 #############
 myTheme = {
-    'border_focus': '0687d2',
+    'border_focus': color_archblue,
     'border_width': 1,
-    'margin': 6
+    'margin': 8
 }
 
 layouts = [
@@ -122,9 +143,6 @@ layouts = [
     # layout.Zoomy(),
 ]
 
-color_grey = "#1c1f24"
-color_light_grey = "#282c34"
-
 widget_defaults = dict(
     font="Ubuntu Bold",
     fontsize=14,
@@ -137,61 +155,74 @@ extension_defaults = widget_defaults.copy()
 #############
 ## Screens ##
 #############
+myWidgets = [
+    widget.Sep(
+        linewidth=0,
+        padding=6,
+        foreground=color_grey,
+        background="#282c34"
+    ),
+    widget.Image(
+        margin=2,
+        filename="~/.config/qtile/archlogo.png"
+    ),
+    widget.Sep(
+        linewidth=0,
+        padding=6,
+        foreground=color_grey,
+        background="#282c34"
+    ),
+    widget.CurrentLayout(),
+    widget.TextBox(
+        text = '|',
+        font = 'Ubuntu Mono',
+        background = color_light_grey,
+        foreground = "#474747",
+        padding = 2,
+        dontsize = 14
+    ),
+    widget.GroupBox(),
+    widget.TextBox(
+        text = '|',
+        font = 'Ubuntu Mono',
+        background = color_light_grey,
+        foreground = "#474747",
+        padding = 2,
+        dontsize = 14
+    ),
+    widget.Prompt(),
+    widget.WindowName(),
+    widget.Chord(
+        chords_colors={
+            "launch": ("#ff0000", "#ffffff"),
+        },
+        name_transform=lambda name: name.upper(),
+    ),
+    # widget.Systray(),
+    widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
+    widget.TextBox(
+        text = '|',
+        font = 'Ubuntu Mono',
+        background = color_light_grey,
+        foreground = "#474747",
+        padding = 2,
+        dontsize = 14
+    ),
+    widget.Battery(),
+    widget.TextBox(
+        text = '|',
+        font = 'Ubuntu Mono',
+        background = color_light_grey,
+        foreground = "#474747",
+        padding = 2,
+        dontsize = 14
+    ),
+    widget.QuickExit(),
+]
 
 screens = [
     Screen(
-        top=bar.Bar(
-            [
-                widget.Sep(
-                    linewidth=0,
-                    padding=6,
-                    foreground=color_grey,
-                    background="#282c34"
-                ),
-                widget.Image(
-                    margin=2,
-                    filename="~/.config/qtile/archlogo.png"
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    padding=6,
-                    foreground=color_grey,
-                    background="#282c34"
-                ),
-                widget.CurrentLayout(),
-                widget.TextBox(
-                    text = '|',
-                    font = 'Ubuntu Mono',
-                    background = color_light_grey,
-                    foreground = "#474747",
-                    padding = 2,
-                    dontsize = 14
-                ),
-                widget.GroupBox(),
-                widget.TextBox(
-                    text = '|',
-                    font = 'Ubuntu Mono',
-                    background = color_light_grey,
-                    foreground = "#474747",
-                    padding = 2,
-                    dontsize = 14
-                ),
-                widget.Prompt(),
-                widget.WindowName(),
-                widget.Chord(
-                    chords_colors={
-                        "launch": ("#ff0000", "#ffffff"),
-                    },
-                    name_transform=lambda name: name.upper(),
-                ),
-                widget.TextBox("default config", name="default"),
-                widget.TextBox("Press &lt;M-r&gt; to spawn", foreground="#d75f5f"),
-                widget.Systray(),
-                widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
-                widget.Battery(),
-                widget.QuickExit(),
-            ],
-            24,
+        top=bar.Bar(widgets = myWidgets, opacity = 0.7, size = 28,
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         ),
