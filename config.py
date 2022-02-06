@@ -28,11 +28,17 @@ from typing import List  # noqa: F401
 
 from libqtile import bar, layout, widget
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
+from libqtile.layout.xmonad import MonadTall
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 
 mod = "mod4"
 terminal = guess_terminal()
+
+
+##########
+## Keys ##
+##########
 
 keys = [
     # A list of available commands that can be bound to keys can be found
@@ -50,22 +56,9 @@ keys = [
     Key([mod, "shift"], "j", lazy.layout.shuffle_down(), desc="Move window down"),
     Key([mod, "shift"], "k", lazy.layout.shuffle_up(), desc="Move window up"),
     # Grow windows. If current window is on the edge of screen and direction
-    # will be to screen edge - window would shrink.
-    Key([mod, "control"], "h", lazy.layout.grow_left(), desc="Grow window to the left"),
-    Key([mod, "control"], "l", lazy.layout.grow_right(), desc="Grow window to the right"),
-    Key([mod, "control"], "j", lazy.layout.grow_down(), desc="Grow window down"),
-    Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
-    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
-    # Toggle between split and unsplit sides of stack.
-    # Split = all windows displayed
-    # Unsplit = 1 window displayed, like Max layout, but still with
-    # multiple stack panes
-    Key(
-        [mod, "shift"],
-        "Return",
-        lazy.layout.toggle_split(),
-        desc="Toggle between split and unsplit sides of stack",
-    ),
+    Key([mod], "minus", lazy.layout.shrink(), desc="Grow focused window size"),
+    Key([mod], "equal", lazy.layout.grow(), desc="Grow focused window size"),
+
     Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
@@ -101,14 +94,26 @@ for i in groups:
         ]
     )
 
+#############
+## Layouts ##
+#############
+myTheme = {
+    'border_focus': '0687d2',
+    'border_width': 1,
+    'margin': 6
+}
+
 layouts = [
-    layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
+    layout.MonadTall(
+        align = MonadTall._left,
+        **myTheme
+    ),
+    # layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
     layout.Max(),
     # Try more layouts by unleashing below layouts.
     # layout.Stack(num_stacks=2),
     # layout.Bsp(),
     # layout.Matrix(),
-    # layout.MonadTall(),
     # layout.MonadWide(),
     # layout.RatioTile(),
     # layout.Tile(),
@@ -117,19 +122,60 @@ layouts = [
     # layout.Zoomy(),
 ]
 
+color_grey = "#1c1f24"
+color_light_grey = "#282c34"
+
 widget_defaults = dict(
-    font="sans",
-    fontsize=12,
-    padding=3,
+    font="Ubuntu Bold",
+    fontsize=14,
+    padding=4,
+    background=color_grey
 )
 extension_defaults = widget_defaults.copy()
+
+
+#############
+## Screens ##
+#############
 
 screens = [
     Screen(
         top=bar.Bar(
             [
+                widget.Sep(
+                    linewidth=0,
+                    padding=6,
+                    foreground=color_grey,
+                    background="#282c34"
+                ),
+                widget.Image(
+                    margin=2,
+                    filename="~/.config/qtile/archlogo.png"
+                ),
+                widget.Sep(
+                    linewidth=0,
+                    padding=6,
+                    foreground=color_grey,
+                    background="#282c34"
+                ),
                 widget.CurrentLayout(),
+                widget.TextBox(
+                    text = '|',
+                    font = 'Ubuntu Mono',
+                    background = color_light_grey,
+                    foreground = "#474747",
+                    padding = 2,
+                    dontsize = 14
+                ),
                 widget.GroupBox(),
+                widget.TextBox(
+                    text = '|',
+                    font = 'Ubuntu Mono',
+                    background = color_light_grey,
+                    foreground = "#474747",
+                    padding = 2,
+                    dontsize = 14
+                ),
                 widget.Prompt(),
                 widget.WindowName(),
                 widget.Chord(
@@ -142,6 +188,7 @@ screens = [
                 widget.TextBox("Press &lt;M-r&gt; to spawn", foreground="#d75f5f"),
                 widget.Systray(),
                 widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
+                widget.Battery(),
                 widget.QuickExit(),
             ],
             24,
@@ -150,6 +197,10 @@ screens = [
         ),
     ),
 ]
+
+###########
+## Mouse ##
+###########
 
 # Drag floating layouts.
 mouse = [
