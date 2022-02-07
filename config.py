@@ -24,6 +24,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from sys import stdout
 from typing import List  # noqa: F401
 
 from libqtile import bar, layout, widget
@@ -34,14 +35,6 @@ from libqtile.utils import guess_terminal
 from libqtile.extension import dmenu
 
 from libqtile import hook
-import os
-import subprocess
-
-@hook.subscribe.startup_once
-def start_once():
-    home = os.path.expanduser('~')
-    subprocess.call([home + '/.config/qtile/autostart.sh'])
-
 
 mod = "mod4"
 terminal = guess_terminal()
@@ -83,9 +76,9 @@ keys = [
     Key(["mod1"], "space", lazy.run_extension(dmenu.DmenuRun(
         dmenu_promt=">",
         background=color_grey,
-        foreground="#474747",
+        foreground="#575757",
         selected_background=color_archblue,
-        selected_foreground="#474747",
+        selected_foreground="#ffffff",
     )), desc="dmenu"),
 ]
 
@@ -120,7 +113,7 @@ for i in groups:
 #############
 myTheme = {
     'border_focus': color_archblue,
-    'border_width': 1,
+    'border_width': 2,
     'margin': 8
 }
 
@@ -274,3 +267,12 @@ auto_minimize = True
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
+
+import subprocess 
+import os
+
+@hook.subscribe.startup_once
+def startup_once():
+    home = os.path.expanduser('~')
+    subprocess.call([home + '/.config/qtile/autostart.sh'], shell=True)
+

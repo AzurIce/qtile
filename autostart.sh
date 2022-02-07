@@ -1,2 +1,2 @@
-feh --bg-scale ~/Files/__VERYSYNC__/_Pics/wallpaper2.jpg
-picom
+picom &
+feh --bg-fill /home/azurice/Files/__VERYSYNC__/_Pics/wallpaper-asuna-wide.png
