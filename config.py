@@ -36,6 +36,9 @@ from libqtile.extension import dmenu
 
 from libqtile import hook
 
+import subprocess 
+import os
+
 mod = "mod4"
 terminal = guess_terminal()
 
@@ -46,8 +49,19 @@ color_light_grey = "#282c34"
 ##########
 ## Keys ##
 ##########
+import re
+from libqtile.log_utils import logger
+
+def backlight(qtile, k):
+    f = f'+{k}' if k>0 else f'{k}'
+    subprocess.run(['xbacklight', f])
+    # subprocess.run(["xrandr", "--output", "eDP-1", "--brightness", brightness])
 
 keys = [
+    ### Brightness
+    Key([], "XF86MonBrightnessUp", lazy.function(backlight, 10), desc="BrightnessUp"),
+    Key([], "XF86MonBrightnessDown", lazy.function(backlight, -10), desc="BrightnessDown"),
+
     # A list of available commands that can be bound to keys can be found
     # at https://docs.qtile.org/en/latest/manual/config/lazy.html
     # Switch between windows
@@ -148,12 +162,22 @@ extension_defaults = widget_defaults.copy()
 #############
 ## Screens ##
 #############
+def mySep():
+    return widget.TextBox(
+        text = '|',
+        font = 'Ubuntu Mono',
+        background = color_light_grey,
+        foreground = "#474747",
+        padding = 2,
+        dontsize = 14
+    )
+
 myWidgets = [
     widget.Sep(
         linewidth=0,
         padding=6,
         foreground=color_grey,
-        background="#282c34"
+        background=color_grey
     ),
     widget.Image(
         margin=2,
@@ -163,26 +187,12 @@ myWidgets = [
         linewidth=0,
         padding=6,
         foreground=color_grey,
-        background="#282c34"
+        background=color_grey
     ),
     widget.CurrentLayout(),
-    widget.TextBox(
-        text = '|',
-        font = 'Ubuntu Mono',
-        background = color_light_grey,
-        foreground = "#474747",
-        padding = 2,
-        dontsize = 14
-    ),
+    mySep(),
     widget.GroupBox(),
-    widget.TextBox(
-        text = '|',
-        font = 'Ubuntu Mono',
-        background = color_light_grey,
-        foreground = "#474747",
-        padding = 2,
-        dontsize = 14
-    ),
+    mySep(),
     widget.Prompt(),
     widget.WindowName(),
     widget.Chord(
@@ -191,25 +201,20 @@ myWidgets = [
         },
         name_transform=lambda name: name.upper(),
     ),
-    # widget.Systray(),
+    widget.Systray(),
     widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
-    widget.TextBox(
-        text = '|',
-        font = 'Ubuntu Mono',
-        background = color_light_grey,
-        foreground = "#474747",
-        padding = 2,
-        dontsize = 14
+    widget.Backlight(
+        fmt='backlight: {}',
+        backlight_name='intel_backlight'
     ),
-    widget.Battery(),
-    widget.TextBox(
-        text = '|',
-        font = 'Ubuntu Mono',
-        background = color_light_grey,
-        foreground = "#474747",
-        padding = 2,
-        dontsize = 14
+    widget.Volume(
+        fmt='Volume: {}'
     ),
+    mySep(),
+    widget.Battery(
+        fmt='Battery: {}'
+    ),
+    mySep(),
     widget.QuickExit(),
 ]
 
@@ -267,9 +272,6 @@ auto_minimize = True
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
-
-import subprocess 
-import os
 
 @hook.subscribe.startup_once
 def startup_once():
